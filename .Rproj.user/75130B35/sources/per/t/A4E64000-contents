@@ -1,0 +1,42 @@
+#Make an integer
+y<-34L
+y
+
+5%%2
+15%/%2
+class(a)
+
+U<-seq(4,18,0.5)
+U
+
+x <-c(10,20,30)
+names(x)<- c("Monday", "Tuesday", "Wednesday")
+x
+
+
+#Dataframe
+Data_frame<- data.frame(subject_now = c("stat123","stat354"),subject_before = c("csc225"))
+Data_frame
+
+#Available dataset to practice
+data()
+
+airquality
+
+#先頭の何行か
+head(airquality)
+
+#num of row
+nrow(airquality)
+#num of column
+ncol(airquality)
+
+
+
+#sampleの撮り方
+a<-c(1,2,3,4,5,6,7)
+#sample(vector, 何個、　TRUEだとreplace = ok(とってもどす))
+sample(a, 3, TRUE)
+#4-70の間の20個をsampleでとる
+sample(4:70,20,replace = T)
+

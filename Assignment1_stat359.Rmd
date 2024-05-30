@@ -1,0 +1,145 @@
+---
+title: "Assignment1_stats359"
+author: "Koki Itagaki"
+date: "2023-01-30"
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Question 2: Suppose the following data comes from a study on plant
+growth (mm) #where 2 plants are in each pot, 3 pots are within each plot
+and 2 plots are #given one of two fertilizer treatments.
+
+```{r}
+#(a) Arrange the data into a dataframe so that it can be analysed. Print out this dataframe.
+
+Dataframe <- data.frame(growth = c(14.6,15.2, 18.5, 16.7,13.2, 12.9,22.2,18.8,
+16.4,12.2,24.7,20.3,7.1,7.7, 9.7,8.8,6.8,6.0,6.8,9.0,10.0,8.3,10.4,11.3), plot = c(1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2), Pot = c(1,1,1,1,2,2,2,2,3,3,3,3,1,1,1,1,2,2,2,2,3,3,3,3), treatment = c(1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2))
+Dataframe 
+
+attach(Dataframe)
+#(b) Sort the data by plant growth.
+sort(growth)
+
+#(c) Calculate the mean, and standard deviation of the data.
+mean(growth)
+
+sd(growth)
+
+#(d) Plot the data using a histogram (R function hist()).
+#Clearly label the axis, title and use bin sizes of 2 mm.
+hist(growth, xlab = "Growth(mm)", main = "Plant growth",sub = "Written by Koki",
+     breaks = seq(0, 30, by = 2))
+
+```
+
+#Question 3: Write a function that uses the short cut formula to
+calculate #the sample variance of a data vector. #Use the vector
+y=(11,11,10,8,11,3,15,11,7,6) as your test vector.
+
+```{r}
+sample.variance<-function(y){
+ return.variance <-  (1/(length(y)-1))*sum((y - sum(y)/length(y))^2)
+ return.variance
+}
+y <-c(11,11,10,8,11,3,15,11,7,6)
+sample.variance(y)
+```
+
+#Question4: On the course webpage you will find a dataset with filename
+'tv.txt' #The data arise from a study examining the time teenagers spend
+watching tv. #A random sample of n = 100 eighth grade American high
+school students was #obtained, and the number of minutes spent watching
+TV during the first week #of October was recorded. A similar sample of m
+= 90 Canadian students was also #obtained. In this study it is of
+interest to compare the TV watching habits of #the teenagers from the
+two different countries, specifically to determine #if Canadian students
+watch less TV than their American counterparts.
+
+```{r}
+#(a)Compare the two samples using appropriate descriptive statistics, including side-by-side boxplots
+tv<-read.table(file ='~/Desktop/stat359/data/tv.txt', sep="",header=TRUE)
+tv
+summary(tv)
+min_canada<-(tv$Canada[!is.na(tv$Canada)])
+min_US<-(tv$US[!is.na(tv$US)])
+c(mean(min_canada),mean(min_US))
+summary(min_canada)
+summary(min_US)
+boxplot(min_canada,min_US, col='green',main = "The time watching TV in 2 
+countries", sub = "Written by Koki Itagaki",
+        names=c('Minutes in Canada','Minutes is the US'))
+
+
+#According to the data above, we can see that the data of Canada was spreaded 
+#more than the data of the U.S. the both means are really close and, 
+#from the data above it is hard to find out the difference between 2 groups.
+
+
+
+
+#determine if Canadian students watch less TV than their American counterparts.
+
+#(b)Write an R function z.test(y1,y2,H1) to compute the p-value for a large sample z-test
+#(discussed in lecture) for testing equality of two population means (H0 : µ1 = µ2).
+#y1, a vector containing the sample measurements from the first population; 
+#y2, a vector containing the sample measurements from the second population; 
+#and H1, a string variable, which takes one of three possible values: 
+#‘two.sided’, ‘less’ or ‘greater’ specifying the alternative hypothesis.
+z.test<-function(y1,y2,H1){
+  n<-length(y1)
+  m<-length(y2)
+  # compute the value of the test statistic
+  Z.obs<-(mean(y1) - mean(y2))/sqrt( (var(y1)/length(y1)) +  (var(y2)/length(y2)))
+  # compute the p-value
+  if(n>=30 && m>=30){
+    if(H1 == "less"){
+      p.value.obs<-pnorm(Z.obs)
+      p.value.obs
+    }else if(H1 == "two.sided"){
+      p.value.obs<-2*(1 - pnorm(abs(Z.obs)))
+      p.value.obs
+    }else if(H1 == "greater"){
+      p.value.obs<-1 - pnorm(Z.obs)
+      p.value.obs
+  }
+  }else{
+    print("The sample size is not large enough for z-test")
+  }
+}
+  
+#(c) Apply your function to the TV data, computing the p-values for each of the three possible
+#alternative hypotheses.
+z.test(min_canada,min_US,"two.sided")
+z.test(min_canada,min_US,"greater")
+z.test(min_canada,min_US,"less")
+
+#(d) Which of the three alternative hypotheses is relevant for the particular 
+#question being asked in this study? Comment on the results.
+
+#My answer
+#We would like to know if tenagers in Canada watch TV less time than teenagers in the U.S.
+#Let u1 = the average time teenagers in Canada watch TV and let u2 = the time teenagers in the U.S 
+#"watch the TV. So the alternative hypotheses is Ha: u1 - u2 < 0 (or u1 < u2)
+
+
+
+
+```
+
+\#(d) Which of the three alternative hypotheses is relevant for the
+particular #question being asked in this study? Comment on the results.
+
+#My answer: We would like to know if tenagers in Canada watch TV less
+time than teenagers in the U.S.Let u1 = the average time teenagers in
+Canada watch TV and let u2 = the time teenagers in the U.S watch the TV.
+So the alternative hypotheses is Ha: u1 - u2 \< 0 (or u1 \< u2)

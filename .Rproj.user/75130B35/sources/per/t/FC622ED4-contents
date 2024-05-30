@@ -1,0 +1,9 @@
+library(sn)
+x<-seq(-4,4,0.1)
+y<-dsn(x,alpha=5)
+plot(x,y,type='l',col='green',lwd=3)
+title('Density of a right-skewed distribut')
+stereograms<-read.table(file ='~/Desktop/stat359/data/stereograms.txt', sep="",header=TRUE)
+stereograms
+NVd <- stereograms$fusion_time[stereograms$group == 'NV']
+NVV<-stereograms$fusion_time[stereograms$group=='VV']

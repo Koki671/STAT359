@@ -1,0 +1,292 @@
+#begin code
+n.size<-c(10,20,50,100)
+n.samples<-c(10,100,1000)
+# plot window split as required
+par(mar=c(1,1,1,1))
+
+par(mfrow=c(length(n.size),length(n.samples)))
+for(i in 1:length(n.size))
+{
+  for (j in 1:length(n.samples))
+  {
+    n.total<-n.size[i]*n.samples[j]
+    ## generate all of the samples at once
+    samples.all<-runif(n.total,0,1) ## uniform case
+    #samples.all<-rpois(n.total,5) ## Poisson case
+    #samples.all<-rbinom(n.total,size=1,p=0.2) ## rbinom
+    ## store the samples in a matrix where columns correspond to 
+    ##individual replicates then take the mean accross the columns which 
+    ##yields a vector of length n.samples finally plot the histogram
+    #par(mar=c(1,1,1,1))
+    samples.mat <- matrix(samples.all, nrow = n.size[i], ncol = n.samples[j],
+                          byrow = TRUE)
+    sample.means <- apply(samples.mat, 2, mean)
+    hist(sample.means, main = paste("Sample size:", n.size[i], "; Number of
+            samples:", n.samples[j]), xlab = "Sample mean", col = "lightblue")
+  }
+}
+par(mfrow=c(length(n.size),length(n.samples)))
+for(i in 1:length(n.size))
+{
+  for (j in 1:length(n.samples))
+  {
+    n.total<-n.size[i]*n.samples[j]
+    ## generate all of the samples at once
+    #samples.all<-runif(n.total,0,1) ## uniform case
+    samples.all<-rpois(n.total,5) ## Poisson case
+    #samples.all<-rbinom(n.total,size=1,p=0.2) ## rbinom
+    ## store the samples in a matrix where columns correspond to individual replicates
+    ## then take the mean accross the columns which yields a vector of length n.samples
+    ## finally plot the histogram
+    #par(mar=c(1,1,1,1))
+    hist(samples.all, main = paste("size for poisson is ", i , "and sample is ", j))
+    
+  }
+}
+par(mfrow=c(length(n.size),length(n.samples)))
+for(i in 1:length(n.size))
+{
+  for (j in 1:length(n.samples))
+  {
+    n.total<-n.size[i]*n.samples[j]
+    ## generate all of the samples at once
+    #samples.all<-runif(n.total,0,1) ## uniform case
+    #samples.all<-rpois(n.total,5) ## Poisson case
+    samples.all<-rbinom(n.total,size=1,p=0.2) ## rbinom
+    ## store the samples in a matrix where columns correspond to individual 
+    #replicates then take the mean accross the columns which yields a vector
+    #of length n.samples finally plot the histogram
+    #par(mar=c(1,1,1,1))
+    samples.matrix <- matrix(samples.all, nrow = n.size[i], ncol = n.samples[j],
+                             byrow = TRUE)
+    sample.means <- apply(samples.mat, 2, mean)
+    hist(sample.means, main = paste("Sample size:", n.size[i], "; 
+    Number of samples:", n.samples[j]), xlab = "Sample mean", col = "lightblue")
+  }
+}
+
+#Question 2: A mixture of salt and sucrose was tasted to investigate how
+#saltiness was judged depending on sucrose concentration and the
+#data are contained in the file: salt.txt
+
+salt<-read.table(file ='~/Desktop/stat359/data/salt.txt', sep="",header=TRUE)
+salt
+saltt<-salt$salt
+summary(saltt)
+#From the summary function, we can see the mean and the median are different.
+#This means I cannot say that bthe graph is symmentric.
+
+
+#(a) Examine several graphical summaries to determine whether
+#the data come from a symmetric distribution. 
+#Use par function to show boxplot and a histgram at the same time
+par(mfrow = c(1,3))
+boxplot(saltt,main= "A mixture of salt and sucrose",sub =
+          "Written by koki Itagaki",col='green',names='salt')
+
+hist(saltt, main = "A mixture of salt and sucrose")
+qqnorm(saltt, main = "QQ-plot: A mixture of salt and sucrose")
+
+#According to the graph above, we cannot say the data is symmentric.
+#The histgram would be right-skewed and also the box plot shows the mean is not
+#close to the center of the box and has 2 outliers.
+#Therefore, this is not symmentric.
+
+
+#(b) Estimate the skew (γ1) and  (γ2) of this distribution 
+#using the data
+skew<-function(x){
+  m<-sum((x-mean(x))^3)/length(x)
+  s<-sqrt(var(x))^3
+  m/s  
+  }
+skew.saltt<-skew(saltt)
+skew.saltt
+
+#Now I will find kurtosis (γ2) of this distribution 
+
+kurtosis<-function(x){
+  m2<-sum((x-mean(x))^4)/length(x)
+  s2<-(var(x))^2
+  m2/s2 -3  
+}
+
+kurtosis(saltt)
+
+#The result above shows that the kurtosis is about -0.934.
+#This means that the middle of the graph is flatter and the tail is heavier
+#than the normal distribution.
+
+
+
+
+#According to the result above, I could say that there is no skewness in this 
+#graph
+
+#(c) Using the bootstrap construct a 95% confidence interval for the
+#population skewness? Does it seem that the population distribution
+#generating the data may be skewed? 
+
+#Now I use bootstarapping for skewness
+x<-saltt ## data for bootstrapping
+B<-15000
+x.boot<-matrix(data=sample(x=x,size=B*length(x),replace=TRUE),
+               nrow=length(x),ncol=B)
+skew.boot.sampled<-apply(x.boot,2,skew)
+boot.interval<-quantile(skew.boot.sampled,probs=c(0.025,0.975))
+boot.interval
+
+hist(skew.boot.sampled, main='Empirical Distribution 
+     for Skewness',sub = "Written by Koki Itagaki",xlab='Sampled Values')
+abline(v= skew.saltt, col='red')
+
+#According to the hist graph, we cannot clearly see that there is a skewness.
+#Also,The 95% confidence interval for the skewness is approximately(-0.90, 1.09)
+#This interval includes 0, it means the skewness is not neither positive nor 
+#negative skewness.
+
+
+
+
+#(d) Using the bootstrap construct a 95% confidence interval for
+#the population kurtosis. Does it seem that the population
+#distribution generating the data may have non-zero kurtosis? 
+
+#Now I use bootstarapping for kurtosis.
+
+x<-saltt ## data for bootstrapping
+B<-15000
+x.boot<-matrix(data=sample(x=x,size=B*length(x),replace=TRUE),
+               nrow=length(x),ncol=B)
+kurtosis.boot.sampled<-apply(x.boot,2,kurtosis)
+boot.interval<-quantile(kurtosis.boot.sampled,probs=c(0.025,0.975))
+boot.interval
+
+hist(skew.boot.sampled, main='Empirical Distribution 
+     for kurtosis',sub = "Written by Koki Itagaki",xlab='Sampled Values')
+abline(v= skew.saltt, col='red')
+
+#According to the hist graph, we cannot clearly see that there is a kurtosis.
+#Also,The 95% confidence interval for the skewness is 
+#approximately(-1.871, 0.586)
+#This interval includes 0, so we are 95% confident that the data does not have 
+#non-zero kurtosis.
+
+#(e) Based on your analysis above, what do you conclude about the
+#distribution? 
+
+#Since the results show that there is not neither large skewness nor kurtosis,
+#I can conclude that the graph is approximately symmentric that means that 
+#the data is evenly spread around the center.
+
+
+
+
+#ok
+#3 Data on the per diem fecundity (fecundity.txt) 
+#(number of eggs laidper female per day for the first 14 days of life) for 25
+#females on 2genetic lines of the fruit fly Drosophila melanogaster are provided
+#Resistant (RS) to DDT were selectively bred and non-selected
+#(NS) was the control. Do RS and NS lines differ in population
+#variance? Do RS and NS lines differ in population mean
+#fecundity?
+
+#1 = rs, 2 = ns
+
+#Lets assume that:Ho: σ1 = σ2 , Ha: σ1 != σ2  (σ1 is not equal to σ2)
+
+fecundity<-read.table(file ='~/Desktop/stat359/data/fecundity.txt'
+                      ,sep="",header=TRUE)
+rs<-fecundity$RS
+ns<-fecundity$NS
+
+
+var.test(rs,ns)
+#Since (p-value = 0.4974) > a = 0.05, wecannot reject Ho.
+#There is a insignificant evidence that the variances are
+#different form each other.
+#This means that the variance of RS is the same as the variance of NS.
+
+
+
+#Since there are not enough sample sizes m and n, we use t-test insted of z-test
+
+#Lets assume that:Ho: u1 = u2 , Ha: u1 != u2  (u1 is not equal to u2)
+
+
+t.test(rs,ns,alternative = "two.sided", mu = 0, var.equal = TRUE)
+#Since (p-value = 0.0013) < a = 0.05, we reject Ho.
+#There is a significant evidence that the means are different form each other.
+#This means that the mean of RS is different from the mean of NS.
+
+
+
+
+#Since the sample size isnt enough, we use t test and to decide
+#which t test I am going to use, I need to test if the variance of 
+#two population distributions is the same
+
+
+
+
+#Q4. Fusible interlinings are being used with increasing frequency to
+#support outer fabrics and improve the shape and drape of various
+#pieces of clothing. The data on extensibility (100%) at 100 gm/cm
+#for both high quality fabric (H) and poor-quality fabric (P)
+#specimens is given in fabric.txt.
+fab<-read.table(file ='~/Desktop/stat359/data/fabric.txt', sep="",header=TRUE)
+fab
+
+#(a) Construct normal qq plots to verify the plausibility of both
+#samples having been selected from normal population
+#distribution
+poor<-(fab$P[!is.na(fab$P)])
+poor
+high<-(fab$H[!is.na(fab$H)])
+high
+par(mar = c(1, 1, 1, 1))
+par(mfrow = c(1,2))
+qqnorm(high,main = "Q-Q plot for high quality fabric", sub = "Written by Koki")
+qqnorm(poor,main = "Q-Q plot for poor quality fabric", sub = "Written by Koki")
+
+#According to the Q-Q plots, it looks the points make a stright line.
+#Therefore, both of the data are normally distributed.
+
+
+#(b) Construct a comparative boxplot. Does it suggest that there is a
+#difference between true average extensibility for high-quality
+#fabric specimens and that for poor-quality specimens?
+boxplot(high,poor, names = c("extensibility for high-quality",
+"extensibility for poor-quality"),main = "box plots of 2 different qualities
+specimens", sub = "Written by Koki")
+
+#From the boxplots, the distributions are almost the same and canot decide 
+#if the population means are different.
+
+
+#(c) Decide whether true average extensibility differs for
+#the two types of fabric. 
+
+#Since the number of samles are less than 30(n< 30, m < 30),
+#I use t-test. First of all, I need find if the variance is the same or not 
+# to dicide which t-test i can use.
+#Assume Ho: σ1 = σ2 , Ha: σ1 != σ2
+var.test(high,poor)
+
+#Since (p-value = 0.4862) > (a = 0.05), we cannot reject Ho.
+#There is a insignificant evidence that both variance are different.
+
+#since the variance are almost the same, I use pooled t-test.
+
+#Ho: u1 = u2
+#Ha: u1!= u2
+
+t.test(high,poor,alternative = "two.sided", mu = 0, var.equal = TRUE)
+
+#Since (p-value = 0.6801) >> a = 0.05, we cannot reject Ho.
+#There is an insignificant evidence that the means are not the same.
+
+
+
+
+

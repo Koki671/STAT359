@@ -1,0 +1,149 @@
+---
+title: "Assignment6_stat359"
+author: "Koki Itagaki"
+date: "2023-04-03"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#A geriatrics researcher studied the effects of two interventions on the frequency of falls. Subjects were at least 65 years of age and in reasonably good health. The variables found in the dataset geriatric.txt are: number of falls, intervention (0=education, 1=education and aerobics), gender (0=female), balance index, strength index.
+
+#(a) Fit a Poisson regression model based on u = exp(b0+ b1x1 + b2x2 + b3x3+ B4x4). Produce
+#a table of estimated coefficients, their estimated standard errors, and the corresponding
+#confidence intervals.
+geriatric<-read.table(file='~/Desktop/stat359/data/geriatric.txt', header = T)
+head(geriatric)
+
+
+table(geriatric$Fall)
+hist(geriatric$Fall)
+
+fit1<-glm(Fall~ Int + Sex + BI + SI,family = poisson,data = geriatric)
+summary(fit1)
+confint(fit1)
+
+par(mfrow = c(3,1))
+plot(fit1,which = c(1,2,4))
+#The Residuals vs fitted graph shows almost the constant variance:However, the
+#q-q plot shows the distribution is right skewed.
+
+
+#a table of estimated coefficients, their estimated standard errors, and the corresponding
+#confidence intervals.
+df<-data.frame(estimate = c(0.489467,-1.069403,-0.046606,0.029104,0.008566),
+               est_sderror = c(
+  0.336869,0.133154,0.119970,0.002953,0.004312),ci = confint(fit1) 
+)
+df
+
+```
+
+
+```{r}
+#(b) Obtain the model deviance and perform a goodness-of-fit test. State your conclusion.
+
+deviance_fit1<-deviance(fit1)
+deviance_fit1
+res_df_fit1<-(fit1$df.residual)
+res_df_fit1
+1-pchisq(deviance_fit1,res_df_fit1)
+#Ho:Model is adequate, Ha: Model not adequate.
+#Dispersion parameter for gaussian family taken to be 1.
+#But,model deviance is 108.79 and degreees of freedom is 95.
+#THese numbers are close. so My conclusion is the model isvgood fit.
+#Also, according to the chi-square test, the p-value > 0.05, this means that 
+#we fail to reject Ho and there is a insignificant evidence that the model 
+#is not adequate.
+
+```
+
+
+```{r}
+#(c) Plot the deviance residuals (versus their index). Do there appear to be any outlying cases?
+dev_res <- residuals.glm(fit1,"deviance")
+plot(seq_along(dev_res),dev_res,
+     main="Deviance Residuals vs. Index", 
+     xlab="Index", 
+     ylab="Deviance Residuals")
+#From the graph, almost all of the data are gathered around 0 at deviance residuals.
+#However there are some outliers whose deviance residuals are approximately 6 and -4.
+```
+
+
+```{r}
+#(d) Use a deviance test to test the hypothesis that gender can be dropped from the model. What is your conclusion?
+#I compute the differrence in deviance as a test statistic and compute the p-value:
+#Ho: b2 = 0 Ha: b2 != 0
+#remove Sex and the fit the smaller model
+fit2<- glm(Fall~ Int + BI + SI,data = geriatric, family = poisson)
+#assess the significance of Sex using a deviance test
+anova(fit2,fit1,test = "Chi")
+
+1-pchisq(deviance(fit2)-deviance(fit1), df = 1)
+
+#Since p-value > a = 0.05, Based on the likelihood ratio we would not reject Ho.
+#Therefore there is a insignificant evidence that the gender is related to the number 
+#of Fall.
+par(mfrow = c(3,1))
+plot(fit2,which = c(1,2,4))
+```
+
+
+```{r}
+#(e) Fit a model without ‘gender’. Obtain an approximate 95% confidence interval for §; (thecoefficient for intervention’) and interpret the confidence interval.
+fit3<-update(fit1,.~. -Sex)
+summary(fit3)
+confint(fit3, "Int")
+par(mfrow = c(3,1))
+plot(fit2,which = c(1,2,4))
+# The 95% confidence interval for the intervention is between -3.7198 and -2.2801.
+#the range of the interval is lower than 0. This means that there is a negative relationships between Fall and intervention. So, If the more the intervention is,
+#the more the number of falls decreases.
+```
+
+
+```{r}
+#(f) Is aerobic exercise associated with a reduction in the frequency of falls
+#when controlling for balance and strength?
+
+boxplot(geriatric$Fall[geriatric$Int == 1], geriatric$Fall[geriatric$Int == 0],
+        names = c("aerobic exercise", "No aerobic excersise"), main = "
+        Falls by aerobic excersise")
+
+#I just put the box plot to show how Int affects the frequency of Fall.
+#According to this graph, it shows that Int might cause a decrease in Fall.
+
+
+
+#Ho: B(int) = 0
+#Ha: B(int) != 0
+fit3<-glm(Fall~ Int + BI + SI,data = geriatric,family = poisson)
+fit4<-glm(Fall~ BI + SI,data = geriatric,family = poisson)
+
+summary(fit3)
+anova(fit3,fit4,test = "Chi")
+confint(fit4)
+
+#I computed the difference in deviance as a test statistic and compute the p-value.
+#Based on the likelihood ratio,we reject Ho. There is a significant evidence that 
+#Int is assorciated with the frequency of Fall.
+
+#Also, according to the summary of the fit3 poisson regression,the p-value is 
+#1.25e-12 <<0.05, so It is significant that aerobic exercise is assorciated 
+#with the frequency of falls. Since the estimate of the Int is -2.999965, also
+#the 95% of the confidence interval of Int is between -3.7197929927 -2.28013697.
+#Therefore, aerobic exercise is associated with a reduction in the frequency of falls
+#when controlling for balance and strength.
+
+
+
+
+
+```
+

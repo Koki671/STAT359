@@ -1,0 +1,187 @@
+1. Beef consumption (in pounds per capita) in the United
+States between 1922 and 1941 are given in the data set
+beef.txt. Other variables of interest are beef price (in cents per pound divided by CPI), income (disposable income per capita in dollars divided by the CPI), and pork consumption(pounds per capita). [CPI= Consumer price index]. Find a
+model that best describes beef consumption in the United
+States. Complete a full analysis of the data (initial plots, model selection, residual plots etc.). Discuss your results.
+
+
+beef<-read.table(file='~/Desktop/stat359/data/beef.txt', header = T)
+attach(beef)
+head(beef)
+dim(beef)
+par(mar = c(4,4,2,2))
+pairs(beef)
+
+
+From the graph, it is not clear the relationships between 
+beef consumption and price. There is a positive trend between beef consumption
+and income.For the plot of beef consumption and pork consumption, it seems to be
+that there is quadratic relationship. First of all, I will do backward selection.
+
+model1<-lm(Beef.Consumption~ Price*Income*Pork.Consumption + I(Pork.Consumption^2))
+summary(model1)
+I(Pork.Consumption^2) is the least significant(p-value = 0.1208)
+
+model2<-update(model1,.~.- I(Pork.Consumption^2))
+summary(model2)
+
+Price x Income x Pork.Consumption is not significant(p-value = 0.0970)
+so I remove it.
+
+model3<-update(model2,.~.- Price:Income:Pork.Consumption)
+summary(model3)
+Income x Pork.Consumption is not significant(p-value = 0.4034) and is removed
+
+model4<-update(model3,.~.- Income:Pork.Consumption)
+summary(model4)
+Price x Income is not significant(p-value = 0.501) and is removed
+
+model5<-update(model4, .~. -Price:Income)
+summary(model5)
+Price x Pork.Consumption is not significant(p-value = 0.0657) and is removed
+
+
+model6<-update(model5,.~. -Price:Pork.Consumption)
+summary(model6)
+par(mfrow = c(1,3))
+plot(model6,which = c(1,2,4))
+Now, R^2 is 0.9212 which is considerably high and the coefficient estimates 
+appear stable.
+It is clear that the variance of residuals is now constant 
+from Residuals vs Fitted plot. Moreover, the qq plot describes that the 
+distribution of the residuals is normally distributed. However, the graph
+of Cooks distance shows that the observation 20 is the most influential element,
+so i remove it and see the result 
+
+model7<-update(model6,.~.,subset=(1:length(Beef.Consumption)!=20))
+summary(model7)
+par(mfrow = c(1,3))
+plot(model7,which = c(1,2,4))
+confint(model7)
+
+In conclusion,price, income,and pork consumption as main effects are related to the mean of 
+beef comsumption ,but the interaction of any variables are not related.
+The equation is 
+Beef.Consumption = 89.400665 +Price*-1.894812 + Income*0.089333 + Pork.Consumption*-0.420366
+Also It is clear that there is a postive relationship between beef consumption
+and Income. When one unit increases in income, the beef consumption increases by
+0.089333. On the other hand, there are negative relationships between 
+beef consumption and price,and between beef consumption and pork consumption.
+When one unit increases in price, the beef consumption decreases by
+1.894812 When one unit increases in pork consumption, the beef consumption
+decreases by 0.420366.
+The 95% Confidence nterval of intercept is (78.00857212, 100.7927589).
+The 95% Confidence interval of Price is (-2.21318371, -1.5764406).
+The 95% Confidence interval of Income is (0.07103601,   0.1076305).
+The 95% Confidence interval of Pork.Consumption is (-0.53445295  -0.3062786).
+The variance of residuals is constant and the qq plot shows that the graph 
+is normally distributed. However, R^2 is 0.9191 which means the graph explains
+the variability of the distribution by Price,Income and Pork.Consumption.
+Therefore, this model is adequate since The variance of residuals is constant,
+and it is normally distributed. Also R^2 is pretty high.
+
+
+
+2. It is well known that the concentrations of cholesterol in
+blood serum increases with age, but it is less clear whether
+cholesterol level is also associated with body weight. The
+data set chol.txt contains data for 30 women and has
+measures of serum cholesterol (CHOL) in millimoles per
+liter, age (years) and body mass index (BMI). Use multiple
+regression to test whether serum cholesterol is associated
+with body mass index when age is included in the model.
+Consider carefully how both variables should be included,
+include initial plots, residual plots etc. Discuss your results
+carefully.
+
+
+
+
+
+
+
+chol <- read.table(file ='~/Desktop/stat359/data/chol.txt',header=TRUE,sep=""
+)
+attach(chol)
+head(chol)
+summary(chol)
+pairs(chol)
+
+From the graphs, it is clear that there is a
+positive linear relationship between serum cholesterol (CHOL) and
+body mass index. Also there is a positive linear relationship 
+between serum cholesterol (CHOL) and Age. So I start with the model
+which will has 2 main effects:Age and BMI and the interaction of Age and BMI.
+
+
+
+model <- lm(CHOL ~ Age * BMI, data = chol)
+summary(model)
+
+This initial model has an R^2 = 0.4743 which is considerably small, and 
+the interaction term is not significant.So, I will remove it from the model and
+keep fitting the model with the rest of the data.
+
+
+model2<-update(model, .~. - Age:BMI)
+summary(model2)
+
+This second model has an R^2 = 0.4654 which is stil very small but now all of effects
+are significant. Then I will check the 3 important graphs now.
+par(mfrow = c(1,3))
+plot(model2, which = c(1,2,4))
+
+It is clear that the variance of residuals is not constant and increases with
+fitted values from Residuals vs Fitted plot.
+Moreover, the qq plot shows that the graph might be right skewed
+Now, I use log tranformation to make the model better.
+
+
+
+
+model3<-lm(log(CHOL)~Age+BMI, data = chol)
+
+summary(model3)
+par(mfrow = c(1,3))
+plot(model3, which = c(1,2,4))
+
+
+Now the variance of the residuals looks constant, and the distribution of the 
+residuals also normally distributed.However, observation 24 might be potentially
+influential. So I will remove the observation.
+
+model4<-update(model3,.~.,subset =(1:length(CHOL)!= 24))
+summary(model4)
+par(mfrow = c(1,3))
+plot(model4, which = c(1,2,4))
+
+After removing observation 24, the coefficient estimates appear stable
+and also R^2 is stable. However, when I see the plots, model3 has more constant 
+variance of the residuals, and it is more normally distributed.
+So, I will use model3 in this case as the result.
+
+
+
+summary(model3)
+par(mfrow = c(1,3))
+plot(model3, which = c(1,2,4))
+confint(model3)
+
+In conclusion,age and BMI is related to the mean of log concentrations of cholesterol in
+blood serum,but the interaction of age and BMI is not related.
+The equation is log(CHOL) = 0.5483 + Age*0.006449 + BMI*0.038581
+Also It is clear that BMI is more assortiated with the mean of cholesterol level
+than Age.Everytime when one unit increases in BMI, log Chol increases by 0.038581 which 
+is much higher than increasing one unit of age which lead log CHOL to increase
+by 0.001779404.
+The 95% Confidence interval of intercept is (-0.101383385, 1.19790770).
+The 95% Confidence interval of Age is (0.001779404, 0.01111773 ).
+The 95% Confidence interval of BMI is (0.008176087 0.06898639 ).
+
+The variance of residuals is constant and the qq plot shows that the graph 
+is normally distributed.However, R^2 is 0.4787 which means only half
+of variability can be explained by Age and BMI.
+However,this model is adequate since The variance of residuals is constant,and
+it is normally distributed.
+
+

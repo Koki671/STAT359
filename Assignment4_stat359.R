@@ -1,0 +1,281 @@
+#Q1. In a study examining smoking and lung cancer, a random sample of men
+#between the ages of 55 and 60 was obtained. The smoking and disease status of
+#each sampled subject was ascertained. For each subject, a ’1’ is assigned if
+#the subject had lung cancer (case) and a ’0’ if not. Similarly, a ’1’ 
+#indicates that a subject is a smoker and a ’0’ indicates a nonsmoker.
+#The data are found in the Excel file ‘LungCancer’.
+
+
+#• Read the data into R, and use table() function to produce a contingency
+#table summarizing these data.
+
+LungCancer<-read.csv(file='~/Desktop/stat359/data/LungCancer.csv',header = TRUE)
+observed<-table(LungCancer)
+observed
+
+#• Assuming that there is no association between smoking and lung cancer,
+#compute a table of ‘expected’ counts.
+
+expected <- round(chisq.test(observed)$expected,2)
+expected
+#I also did this by hand.
+#• By hand, compute the observed value of the test statistic for testing
+#association between lung cancer and smoking.
+#The result is in a different file
+
+#• Assuming there is no association, what is the distribution of 
+#the test statistic?
+
+#If there is no association,the distribution of 
+#the test statistic follows a chi-squared distribution with degrees
+#of freedom equal to (r-1)(c-1) = (2-1)(2-1) = 1
+
+#• Using R, compute the p-value for a test of association, and give a 
+#detailed conclusion based on the p-value and a comparison of the tables 
+#observed and expected counts.
+1-pchisq(18.63,df = 1)
+#Since p-value = 1.587034e-05 << a = 0 .05, we reject Ho. There is a significant 
+#evidence that there is an association between Smokers and Cases of lung cancer.
+#Also from 2 tables I created above, you can see that the number of cases of the
+#lung cancers whose patients are smokers is at least 10 times higher than the
+#number of cases of the lung cancers whose patients are non-smokers.
+#Therefore the number of cases of the lung cancers is associated with smoking.
+
+
+
+
+
+#2. The following data are from a study examining the incidence of tuberculosis 
+#in relation to blood groups in a sample of Eskimos. It is of interest to 
+#determine if there is any association between the disease and blood group 
+#within the ABO system.
+#Severity O A AB B
+#Moderate-advanced 7 7 7 13
+#Minimal 27 34 12 18
+#Not Present 55 52 11 24
+#• Assuming that there is no association between disease and blood group, 
+#compute a table of ‘expected’ counts.
+
+data <- c(7,7,7,13,27,34,12,18,55,52,11,24)
+
+data <- c(7, 7, 7, 13, 27, 34, 12, 18, 55, 52, 11, 24)
+mat <- matrix(data, nrow = 3, ncol = 4, byrow = TRUE)
+
+# Calculate the expected counts
+row_totals <- rowSums(mat)
+col_totals <- colSums(mat)
+grand_total <- sum(mat)
+e_row <- matrix(row_totals, nrow = nrow(mat), ncol = ncol(A), byrow = TRUE)
+e_col <- matrix(col_totals, nrow = nrow(mat), ncol = ncol(A), byrow = FALSE)
+mat_expected <- e_row * e_col / grand_total
+
+print(mat_expected)
+#• By hand, compute the observed value of the test statistic for testing association between
+#disease and blood group.
+
+#• Assuming there is no association, what is the distribution of the test statistic?
+#If there is no association between the disease and blood group,the distribution of 
+#the test statistic follows a chi-squared distribution with degrees
+#of freedom equal to (r-1)(c-1) = (3-1)(4-1) = 6
+#• Using R, compute the p-value for a test of association, and give a detailed conclusion
+#based on the p-value and a comparison of the tables observed and expected counts.
+1-pchisq(q = 16.1427,df=6)
+#Since p-value = 0.01300819 < a = 0 .05, we reject Ho. There is a significant 
+#evidence that there is an association between disease and blood group.
+#Also from 2 tables,When I see the row Minimal, The number of cases, which severty
+# is Minimal, of people whose blood types arebO and A have almost two time as much as 
+#people whose blood type is AB or B.
+
+#wordだけ
+#3. The file ‘Anscombe’ contains 4 diferent datasets, each of which are based on a response Y,
+#and a covariate X.
+ancombe<-read.csv('~/Desktop/stat359/data/anscombe.csv',header=TRUE)
+ancombe
+
+
+#(a) Produce 4 scatter plots (one for each dataset), on the same page, 
+#illustrating the relationship between Y and X. Describe each of these briefly, 
+#and state if you think a linear
+#model of the form yi = a + bxi + ≤i would be appropriate.
+#4
+ancombe[45:55,2]
+par(mar = c(1,1,1,1))
+par(mfrow = c(2,2))
+plot(ancombe[2:12,1],ancombe[2:12,2], xlab = "The value of x",
+     ylab = "The value of y", main = "Scatterplot of Set1 from anscombe.csv",
+     sub = "Written by Koki Itagaki")
+plot(ancombe[16:26,1],ancombe[16:26,2], xlab = "The value of x",
+     ylab = "The value of y", main = "Scatterplot of Set2 from anscombe.csv",
+     sub = "Written by Koki Itagaki")
+plot(ancombe[30:40,1],ancombe[30:40,2], xlab = "The value of x",
+     ylab = "The value of y", main = "Scatterplot of Set3 from anscombe.csv",
+     sub = "Written by Koki Itagaki")
+plot(ancombe[45:55,1],ancombe[45:55,2], xlab = "The value of x",
+     ylab = "The value of y", main = "Scatterplot of Set4 from anscombe.csv",
+     sub = "Written by Koki Itagaki")
+
+#According to the graphs, we can see the different trend of the data.
+#Graph 1 shows that there is a positive linear relationships between x and y.
+#However, graph 2 is a quadric equation.
+#The data from graph 3 also have a  positive relationships between x and y with
+#a outlier at arount x = 13 and y = 14.
+#There is not a linear relationships in graph 4.The x value of all data is 8 
+#except one outlier. it means it does not show any correlation between x and y.
+#Therefore, in my opinion,Graph1 and Graph 3 can be shown as yi = a + bxi + error
+
+
+#(b) Perform 4 separate simple linear regressions (one for each dataset)and 
+#produce a table (in your text editor (ie. word)) that shows the R2 value. 
+#Discuss what is happening here (hint: for simple linear regression, R2 is just
+#the square of the sample correlation coe±cient).
+class(set1_x)
+set1_x<-ancombe[2:12,1]
+set1_x<-as.numeric(set1_x)
+set1_y<-ancombe[2:12,2]
+set1_y<-as.numeric(set1_y)
+re_set1<-lm(set1_x~set1_y)
+re_set1
+
+
+set2_x<-ancombe[16:26,1]
+set2_x<-as.numeric(set2_x)
+set2_y<-ancombe[16:26,2]
+set2_y<-as.numeric(set2_y)
+re_set2<-lm(set2_x~set2_y)
+re_set2
+
+set3_x<-ancombe[30:40,1]
+set3_x<-as.numeric(set3_x)
+set3_y<-ancombe[30:40,2]
+set3_y<-as.numeric(set3_y)
+re_set3<-lm(set3_x~set3_y)
+re_set3
+
+set4_x<-ancombe[45:55,1]
+set4_x<-as.numeric(set4_x)
+set4_y<-ancombe[45:55,2]
+set4_y<-as.numeric(set4_y)
+re_set4<-lm(set4_x~set4_y)
+re_set4
+
+summary(re_set1)
+summary(re_set2)
+summary(re_set3)
+summary(re_set4)
+
+
+#Dataset R^2
+# 1.   0.67
+# 2.   0.67
+# 3    0.67
+# 4.   0.67
+
+#The Rs of all datasets is the same even though the shapes of 4 graphs are
+#totally different. For examle, the first graph shows that there is a linear 
+#moderate relationship and the third graph shows that there is a strong linear
+#relationships with only one outlier. This means if the data set has at least 
+#one outlier, the correlation rate between x and y changes considerably.
+#Moreover, the data set 4 shows that quadratic curve and the correlation rate is
+#also the same as the dataset 1 and 3.
+
+
+
+
+#4. The file ‘growth’ gives data on the height of a white spruce 
+#tree measured annually for 50 years. Letting Yt denote the height of the
+#tree at year t > 0, we consider describing the growth of the tree over time 
+#with a non-linear model Yt = f(t) + ≤t, ≤t iidª N(0;, æ2). Three growth
+#curves are considered for f(t)
+#(a) Logistic: f(t) = a/(1 + b § exp{°ct})
+#(b) Gompertz: f(t) = a exp{°b exp{°ct}}
+#(c) Von BertalanÆy: f(t) = a ° a exp{°b(t + c)}
+#• Fit all three models using the non-linear least squares function nls() in R.
+#Explain how you are choosing the starting values for nls() in each case. 
+#Produce a figure depicting the estimated curves all on the same plot, along
+#with the observed data. Be sure to include a legend to distinguish the
+#diÆerent curves.
+data <- read.table(file='~/Desktop/stat359/data/growth.txt',header=TRUE)
+y <- data$height
+t <- data$t
+a.start <- max(y)
+
+# Logistic
+b.start <- a.start/(min(y))
+c.start <- -log((a.start-mean(y))/(b.start*mean(y)))/mean(t)
+
+# Fit logistic model using nls()
+logistic <- nls(y ~ a/(1+b*exp(-c*t)), 
+                start=list(a=a.start, b=b.start, c=c.start), 
+                trace=TRUE)
+
+# Gompertz
+b.start <- -log(min(t)/a.start)
+c.start <- -log(-log(mean(y)/a.start)/b.start)/mean(t)
+
+# Fit gompertz model using nls()
+gompertz <- nls(y ~ a*exp(-b*exp(-c*t)), 
+                start=list(a=a.start, b=b.start, c=c.start), 
+                trace=TRUE)
+
+# VB
+b.start <- -log((mean(y)-a.start)/(min(y)-a.start))/mean(t)
+c.start <- -log((a.start-min(y))/a.start)/b.start
+
+# Fit VB model using nls()
+vb <- nls(y ~ a*(1-exp(-b*(t+c))), 
+          start=list(a=a.start, b=b.start, c=c.start), 
+          trace=TRUE)
+
+
+
+
+#I basically find the unknown parameters:a,b,and c for each cases and pass the 
+#values to the nls function  to calculate 
+
+
+# Define a function to generate predictions from a model
+predict_model <- function(model, t_values) {
+  predicted_values <- predict(model, list(t = t_values))
+  return(predicted_values)
+}
+
+plot(t, y, xlab = "time in years", ylab = "height in meters")
+# predict values for different models
+tseq <- seq(min(t), max(t), 0.01)
+H.vb <- predict(vb, list(t = t_seq))
+H.gompertz <- predict(gompertz, list(t = t_seq))
+H.logistic <- predict(logistic, list(t = t_seq))
+
+# add lines to the plot for each model
+lines(tseq, H.vb, col = "yellow")
+lines(tseq, H.gompertz, col = "blue")
+lines(tseq, H.logistic, col = "green")
+
+# add a legend to the plot
+legend(x = 5, y = 40, legend = c("VB", "Gompertz", "Logistic"), fill = c("yellow", "blue", "green"))
+
+#• For each of the three models, give a 95% confidence interval for limt!1f(t).
+#What doest his represent?
+z<-1.96
+paste("95% CI for the first model is: ",74.411938 -z*9.950934 , 74.411938 +z*9.950934,
+  "95% CI for the second model is: ",50.4208-z*0.8473 , 50.4208 +z*0.8473,
+  "95% CI for the third model is: ",52.21789 -z*1.33361 , 52.21789 +z*1.33361 )
+t.plot <- seq(min(t), max(t), 0.01)
+
+
+
+#• Select the best of the three models, and plot an estimate of the
+#derivative df(t) dt , which represents the rate of growth over time.
+
+# define variables a, b, and c
+a <- 50.4208; b <- 47.1377; c <- 0.1993
+
+# calculate the derivative of Y with respect to time
+deriva <- a*b*c*exp(-c * t.plot) / ((1 + b * exp(-c * t.plot))^2)
+deriva
+plot(deriva,main = "estimate of the derivative")
+
+
+
+
+
